@@ -27,6 +27,7 @@ class LitUNet(pl.LightningModule):
     post_label : Compose
         callable to transform labels to discrete values
         in validation loop
+
     Methods
     -------
     forward(x):
@@ -37,18 +38,26 @@ class LitUNet(pl.LightningModule):
         defines training loop
     validation_step(batch, batch_idx):
         defines validation loop
+    test_step(batch, batch_idx):
+        defines test loop
     """
-    def __init__(self):
+    def __init__(self, hparams):
         """Initialize attributes
+
+        Parameters
+        ----------
+        args : Any
+            user inputs and defaults
         """
         super().__init__()
+        self.save_hyperparameters(hparams)
         self.model = UNet(
-            spatial_dims=3,
-            in_channels=1,
-            out_channels=2,
-            channels=(16, 32, 64, 128, 256),
-            strides=(2, 2, 2, 2),
-            num_res_units=2,
+            spatial_dims=self.hparams.spatial_dims,
+            in_channels=self.hparams.in_channels,
+            out_channels=self.hparams.out_channels,
+            channels=self.hparams.channels,
+            strides=self.hparams.strides,
+            num_res_units=self.hparams.num_res_units,
             norm=Norm.BATCH,
         )
         self.loss_function = DiceLoss(to_onehot_y=True, softmax=True)
@@ -80,7 +89,7 @@ class LitUNet(pl.LightningModule):
             pytorch Adam optimizer object
         """
         # Create Adam optimizer object with learning rate of 1e-4
-        optimizer = torch.optim.Adam(self.model.parameters(), 1e-4)
+        optimizer = torch.optim.Adam(self.model.parameters(), self.hparams.lr)
         return optimizer
 
     def training_step(self, batch, batch_idx):
@@ -108,7 +117,7 @@ class LitUNet(pl.LightningModule):
         # calculate loss
         loss = self.loss_function(outputs, labels)
         # log statistics
-        self.log('train_loss', loss, on_epoch=True)
+        self.log("train_loss", loss, on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -132,9 +141,9 @@ class LitUNet(pl.LightningModule):
             batch["label"],
         )
         # define spatial window size for inference
-        roi_size = (160, 160, 160)
+        roi_size = self.hparams.roi_size
         # define batch size to run window slices
-        sw_batch_size = 4
+        sw_batch_size = self.hparams.sw_batch_size
 
         # perform MONAI sliding window inference
         val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, self.model)
@@ -144,6 +153,31 @@ class LitUNet(pl.LightningModule):
         val_labels = [self.post_label(i) for i in decollate_batch(val_labels)]
 
         # compute mean dice
-        self.dice_metric(y_pred=val_outputs, y=val_labels)
-        return self.dice_metric
+        val_loss = self.dice_metric(y_pred=val_outputs, y=val_labels)
+        # log statistics
+        self.log("val_loss", val_loss, on_epoch=True)
+        return val_loss
+
+    def test_step(self, batch, batch_idx):
+        """ Test loop
+
+        Parameters
+        ----------
+        batch : Any
+            single batch from test set
+        batch_idx : int
+            batch index
+        """
+        # get test inputs
+        test_inputs = batch["image"]
+        # define spatial window size for inference
+        roi_size = self.hparams.roi_size
+        # define batch size to run window slices
+        sw_batch_size = self.hparams.sw_batch_size
+
+        # perform MONAI sliding window inference
+        test_outputs = sliding_window_inference(test_inputs, roi_size, sw_batch_size, self.model)
+
+        # decollate output data and apply post processing transforms
+        test_outputs = [self.post_pred(i) for i in decollate_batch(test_outputs)]
 
