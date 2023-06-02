@@ -46,7 +46,7 @@ class LitUNet(pl.LightningModule):
 
         Parameters
         ----------
-        args : Any
+        hparams : Any
             user inputs and defaults
         """
         super().__init__()
@@ -177,7 +177,6 @@ class LitUNet(pl.LightningModule):
 
         # perform MONAI sliding window inference
         test_outputs = sliding_window_inference(test_inputs, roi_size, sw_batch_size, self.model)
-
         # decollate output data and apply post processing transforms
         test_outputs = [self.post_pred(i) for i in decollate_batch(test_outputs)]
 
