@@ -10,8 +10,7 @@ def main():
     parser = ArgumentParser()
 
     # root directory argument
-    parser.add_argument("--root_dir", type=str, default="/Users/sandunipinnawala/Documents/Git_Repos/monai-3d-spleen"
-                                                        "-seg-testing")
+    parser.add_argument("--root_dir", type=str, default="/.")
     parser.add_argument('--seed', type=int, default=0)
 
     # model specific arguments

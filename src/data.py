@@ -83,10 +83,10 @@ class SpleenDataModule(pl.LightningDataModule):
                 RandCropByPosNegLabeld(
                     keys=["image", "label"],
                     label_key="label",
-                    spatial_size=(96, 96, 96),
+                    spatial_size=(64, 64, 64),
                     pos=1,
                     neg=1,
-                    num_samples=4,
+                    num_samples=2,
                     image_key="image",
                     image_threshold=0,
                 ),
@@ -159,11 +159,11 @@ class SpleenDataModule(pl.LightningDataModule):
             train_files, val_files = data_dicts[:-9], data_dicts[-9:]
 
             # 'CacheDataset' used to accelerate training process
-            self.train_ds = CacheDataset(data=train_files, transform=self.train_transforms, cache_rate=1.0, num_workers=4)
-            # self.train_ds = Dataset(data=train_files, transform=self.train_transforms)
+            # self.train_ds = CacheDataset(data=train_files, transform=self.train_transforms, cache_rate=1.0, num_workers=4)
+            self.train_ds = Dataset(data=train_files, transform=self.train_transforms)
             # 'CacheDataset' used to accelerate validation process
-            self.val_ds = CacheDataset(data=val_files, transform=self.val_transforms, cache_rate=1.0, num_workers=4)
-            # self.val_ds = Dataset(data=val_files, transform=self.val_transforms)
+            # self.val_ds = CacheDataset(data=val_files, transform=self.val_transforms, cache_rate=1.0, num_workers=4)
+            self.val_ds = Dataset(data=val_files, transform=self.val_transforms)
 
         # assign test dataset for use in dataloader
         if stage == "test":
