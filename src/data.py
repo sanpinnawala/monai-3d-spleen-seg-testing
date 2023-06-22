@@ -46,7 +46,7 @@ class SpleenDataModule(pl.LightningDataModule):
     test_dataloader():
         generates and returns test dataloader
     """
-    def __init__(self, data_dir: str = "./"):
+    def __init__(self, data_dir, hparams):
         """Initialize attributes
 
         Parameters
@@ -55,7 +55,7 @@ class SpleenDataModule(pl.LightningDataModule):
             path to data directory
         """
         super().__init__()
-        self.save_hyperparameters()
+        self.save_hyperparameters(hparams)
         self.data_dir = data_dir
         self.train_transforms = Compose(
             [
@@ -139,7 +139,7 @@ class SpleenDataModule(pl.LightningDataModule):
             ]
         )
 
-    def setup(self, stage: str):
+    def setup(self, stage):
         """Performs data setup operations such as data splitting, applying transforms
         and defining the datasets
 
@@ -180,7 +180,7 @@ class SpleenDataModule(pl.LightningDataModule):
         DataLoader
             MONAI dataloader for training data loading
         """
-        return DataLoader(self.train_ds, batch_size=2, shuffle=True, num_workers=4)
+        return DataLoader(self.train_ds, batch_size=self.hparams.batch_size, shuffle=True, num_workers=self.hparams.num_workers)
 
     def val_dataloader(self):
         """Returns validation dataloader, an iterable over validation dataset with
@@ -191,7 +191,7 @@ class SpleenDataModule(pl.LightningDataModule):
         DataLoader
             MONAI dataloader for validation data loading
         """
-        return DataLoader(self.val_ds, batch_size=1, num_workers=4)
+        return DataLoader(self.val_ds, batch_size=1, num_workers=self.hparams.num_workers)
 
     def test_dataloader(self):
         """Returns testing dataloader, an iterable over testing dataset
@@ -201,4 +201,4 @@ class SpleenDataModule(pl.LightningDataModule):
         DataLoader
             MONAI dataloader for testing data loading
         """
-        return DataLoader(self.test_ds, batch_size=1, num_workers=4)
+        return DataLoader(self.test_ds, batch_size=1, num_workers=self.hparams.num_workers)

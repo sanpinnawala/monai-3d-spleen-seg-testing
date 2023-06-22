@@ -1,16 +1,16 @@
 # lightning.pytorch==2.0.3
 seed_everything: 45
 trainer:
-  accelerator: auto
+  accelerator: "gpu"
   strategy: auto
   devices: auto
   num_nodes: 1
-  precision: 32-true
+  precision: 16-mixed
   logger: null
   callbacks:
     class_path: lightning.pytorch.callbacks.ModelCheckpoint
     init_args:
-      dirpath: /.
+      dirpath: "/nfs/home/spinnawala/Repos/monai-3d-spleen-seg-testing/models/"
       filename: best_model
       monitor: val_loss
       verbose: false
@@ -24,7 +24,7 @@ trainer:
       every_n_epochs: null
       save_on_train_epoch_end: null
   fast_dev_run: false
-  max_epochs: 5
+  max_epochs: 1000
   min_epochs: null
   max_steps: -1
   min_steps: null
@@ -37,7 +37,7 @@ trainer:
   val_check_interval: null
   check_val_every_n_epoch: 1
   num_sanity_val_steps: null
-  log_every_n_steps: null
+  log_every_n_steps: 2
   enable_checkpointing: null
   enable_progress_bar: null
   enable_model_summary: null
@@ -54,7 +54,7 @@ trainer:
   plugins: null
   sync_batchnorm: false
   reload_dataloaders_every_n_epochs: 0
-  default_root_dir: null
+  default_root_dir: "/nfs/home/spinnawala/Repos/monai-3d-spleen-seg-testing/"
 model:
   hparams:
     spatial_dims: 3
@@ -79,5 +79,8 @@ model:
     - 160
     sw_batch_size: 4
 data:
-  data_dir: /.
+  data_dir: "/nfs/home/spinnawala/Repos/monai-3d-spleen-seg-testing/data/Task09_Spleen"
+  hparams:
+    batch_size: 16
+    num_workers: 4
 ckpt_path: null

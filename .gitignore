@@ -1,2 +1,5 @@
 # Environments
 venv/
+lightning_logs/
+Dockerfile
+*.sh

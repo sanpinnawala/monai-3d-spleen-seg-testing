@@ -10,7 +10,7 @@ def main():
     parser = ArgumentParser()
 
     # root directory argument
-    parser.add_argument("--root_dir", type=str, default="/.")
+    parser.add_argument("--root_dir", type=str, default="/nfs/home/spinnawala/Repos/monai-3d-spleen-seg-testing/")
     # Parse the user inputs and defaults (returns a argparse.Namespace)
     args = parser.parse_args()
     # path to data directory

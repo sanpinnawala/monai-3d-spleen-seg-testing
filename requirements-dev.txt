@@ -58,3 +58,4 @@ click>=8.1.2
 testresources
 pre-commit
 attrs>=22.1.0
+jsonargparse[signatures]>=4.17.0
