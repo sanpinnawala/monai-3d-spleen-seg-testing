@@ -1,5 +1,7 @@
 # Environments
 venv/
+.idea/
 lightning_logs/
+.DS_Store
 Dockerfile
 *.sh
